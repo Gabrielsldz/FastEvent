@@ -1,0 +1,43 @@
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgres"
+  url      = "postgres://postgres:1234@localhost:5432/sportynder"
+}
+
+model User {
+  id               String          @id @default(uuid())
+  email            String          @unique
+  password         String
+  location         String          @default("unknown")
+  name             String
+  age              Int             @default(18)
+  eventsCreated    Events[]
+  eventsInterested EventInterest[]
+}
+
+model Events {
+  id          String          @id @default(uuid())
+  date        DateTime        @default(now())
+  ends        DateTime        @default(now())
+  banner      String
+  location    String
+  name        String          @default("Unnamed Event")
+  description String
+  creator     User?           @relation(fields: [creatorId], references: [id])
+  creatorId   String?
+  interested  EventInterest[]
+}
+
+model EventInterest {
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  event   Events @relation(fields: [eventId], references: [id])
+  eventId String
+
+  @@id([userId, eventId])
+}
